@@ -1,19 +1,21 @@
-version: '3'
+# docker compose that use one image named : ros:foxy-ros1-bridge-focal
+# The docker image contains ros and ros2
+# It communicate to the local version of ros (melodic)
+
+version: '3.9'
 
 services:
-  ros1:
-    build:
-      context: ./
-      dockerfile: ros1.Dockerfile
-
-  ros2:
-    build:
-      context: ./
-      dockerfile: ros2.Dockerfile
-
-  bridge:
+  ros1_bridge:
     image: ros:foxy-ros1-bridge-focal
+    container_name: ros1_bridge
+    network_mode: host
     environment:
-      - "ROS_HOSTNAME=bridge"
-      - "ROS_MASTER_URI=http://ros1:11311"
-    command: ros2 run ros1_bridge dynamic_bridge
+      ROS_DOMAIN_ID: 30
+      ROS_MASTER_URI: http://localhost:11311
+      ROS2_MASTER_URI: http://localhost:11311
+    command: >
+      bash -c "
+        source /opt/ros/foxy/setup.bash;
+        source /opt/ros/noetic/setup.bash;
+        ros2 run ros1_bridge dynamic_bridge --bridge-all-topics
+      "
